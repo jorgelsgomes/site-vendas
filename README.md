@@ -5,3 +5,4 @@ Nele será possível: ver, buscar produtos da API modelo e acompanhar o carrinho
 
 
 Teste Agora!
+https://site-de-vendas.vercel.app/
