@@ -1,8 +1,7 @@
-# React + Vite
+# Boas-vindas ao repositório do projeto site de vendas!
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Objetivo foi criar um modelo de projeto futuro para ser implementado de forma profissional, utilizando o que há de mais moderno dentro do ecossistema React: Hooks, estados e componentes.
+Nele será possível: ver, buscar produtos da API modelo e acompanhar o carrinho de compras.
 
-Currently, two official plugins are available:
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+Teste Agora!
