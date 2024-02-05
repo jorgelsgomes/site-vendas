@@ -48,7 +48,7 @@ function App() {
     getAddToCart(copyProductsCart)
   }
 
-  // função que recupera os ID do local storage busca o produto para adicionar ao carrinho de compras 
+  // função que recupera os ID do local storage busca o produto para adicionar ao carrinho de compras.
   async function getAddToCart(productIds) {
     if (productIds && productIds.length > 0) {
       try {
@@ -59,15 +59,15 @@ function App() {
   
         const fetchedProducts = await Promise.all(fetchPromises);
   
-        // Atualize o carrinho com os produtos obtidos
+        // Atualize o carrinho com os produtos obtidos.
         setProductsCart(fetchedProducts);
   
-        // Calcule o subtotal somando os preços dos produtos
+        // Calcule o subtotal somando os preços dos produtos.
         const newSubtotal = fetchedProducts.reduce((total, product) => {
           return total + parseFloat(product.price);
         }, 0);
   
-        // Atualize o estado do subtotal
+        // Atualize o estado do subtotal.
         setSubtotal(newSubtotal);
       } catch (error) {
         console.error('Erro ao obter produtos:', error);
@@ -76,19 +76,19 @@ function App() {
   }
   
 
-  // Função para remover um produto do carrinho
+  // Função para remover um produto do carrinho.
 function handleRemoveToCart(productId) {
   setProductsCartId((prevProductsCart) => {
     const copyProductsCart = [...prevProductsCart];
-  // Encontra o índice do produto no array de IDs
+  // Encontra o índice do produto no array de IDs.
   const indexToRemove = copyProductsCart.findIndex((id) => id === productId);
-  // Remove o produto do array de IDs se encontrado
+  // Remove o produto do array de IDs se encontrado.
   if (indexToRemove !== -1) {
     copyProductsCart.splice(indexToRemove, 1);
-    // Atualiza o estado e o local storage com os IDs atualizados
+    // Atualiza o estado e o local storage com os IDs atualizados.
     setProductsCartId(copyProductsCart);
     saveCart(copyProductsCart);
-    // Atualiza os produtos no carrinho
+    // Atualiza os produtos no carrinho.
     getAddToCart(copyProductsCart);
   }
   return copyProductsCart;
