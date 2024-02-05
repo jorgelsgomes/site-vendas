@@ -4,72 +4,97 @@ import carrinho from './imgs/carrinho.png';
 import './App.css';
 import formatCurrency from './helpers/tranformcurrynce';
 import { fetchProduct, fetchListProducts } from './helpers/fetchProducts';
-import { getProduct } from './helpers/getProduct';
+import { getProduct, saveCart } from './helpers/localStorage';
 
 
 function App() {
-  // estado que controla a visibilidade do carrinho de compras
+  // estado que controla a visibilidade do carrinho de compras.
   const [isCartVisible, setIsCartVisible] = useState(false);
-  // Estado que armazena os produtos vindo da api
+  // Estado que armazena os produtos vindo da api.
   const [products, setProducts] = useState([]);
-  // Estado que armazena os ids dos produtos adicionados no carrinho de compras
-  const [productsCartId, setProductsCartId] = useState([])
-  // Estado que armazena os prudutos no carrinho
-  const [productsCart, setProductsCart] = useState([])
-  // estado que controla o input de busca
-  const [busca, setbusca] = useState()
+  // Estado que armazena os ids dos produtos adicionados no carrinho de compras.
+  const [productsCartId, setProductsCartId] = useState([]);
+  // Estado que armazena os prudutos no carrinho.
+  const [productsCart, setProductsCart] = useState([]);
+  // estado que controla o input de busca.
+  const [busca, setbusca] = useState();
+  // estado que controla o subtotal do carrinho.
+  const [subtotal, setSubtotal] = useState(0);
+
 
   //Get API mercado livre
   useEffect(() => {
+    const savedCart = getProduct();
+    setProductsCartId(savedCart);
+    getAddToCart(savedCart);
+    
     fetchListProducts(busca).then((response) => {
       setProducts(response);
     });
    
   }, [busca]);
 
-  // função do botão adicinar ao carrinho
+  // função do botão adicinar ao carrinho, captura os IDs dos produtos e add a um estado e sava no local storage.
   function handleAddIdToCart(productId) {
-    const copyproductsCart = [...productsCartId]
+    const copyProductsCart = [...productsCartId]
 
-    const product = copyproductsCart.find(product => product.id === productId)
+    const product = copyProductsCart.find(product => product.id === productId)
 
     if (!product) {
-      copyproductsCart.push(productId)
+      copyProductsCart.push(productId)
     }
-    setProductsCartId(copyproductsCart)
-    saveCart(copyproductsCart)
-    getAddToCart()
+    setProductsCartId(copyProductsCart)
+    saveCart(copyProductsCart)
+    getAddToCart(copyProductsCart)
   }
 
-  // função adicionar 
-  async function getAddToCart() {
-    const localProductCart = getProduct()
-
-    if (localProductCart) {
+  // função que recupera os ID do local storage busca o produto para adicionar ao carrinho de compras 
+  async function getAddToCart(productIds) {
+    if (productIds && productIds.length > 0) {
       try {
-        const fetchPromises = localProductCart.map(async (id) => {
+        const fetchPromises = productIds.map(async (id) => {
           const response = await fetchProduct(id);
           return response;
         });
+  
         const fetchedProducts = await Promise.all(fetchPromises);
-
+  
         // Atualize o carrinho com os produtos obtidos
         setProductsCart(fetchedProducts);
-
+  
+        // Calcule o subtotal somando os preços dos produtos
+        const newSubtotal = fetchedProducts.reduce((total, product) => {
+          return total + parseFloat(product.price);
+        }, 0);
+  
+        // Atualize o estado do subtotal
+        setSubtotal(newSubtotal);
       } catch (error) {
         console.error('Erro ao obter produtos:', error);
       }
     }
   }
+  
 
-  //salvar id dos produtos no localstorige
-  function saveCart(productId) {
-    localStorage.setItem('id', JSON.stringify(productId));
+  // Função para remover um produto do carrinho
+function handleRemoveToCart(productId) {
+  setProductsCartId((prevProductsCart) => {
+    const copyProductsCart = [...prevProductsCart];
+  // Encontra o índice do produto no array de IDs
+  const indexToRemove = copyProductsCart.findIndex((id) => id === productId);
+  // Remove o produto do array de IDs se encontrado
+  if (indexToRemove !== -1) {
+    copyProductsCart.splice(indexToRemove, 1);
+    // Atualiza o estado e o local storage com os IDs atualizados
+    setProductsCartId(copyProductsCart);
+    saveCart(copyProductsCart);
+    // Atualiza os produtos no carrinho
+    getAddToCart(copyProductsCart);
   }
+  return copyProductsCart;
+});
+}
 
-  // function handleRemoveToCart () {
-
-  // }
 
   return (
     <>
@@ -107,14 +132,16 @@ function App() {
                     <span className="product__title">{product.title}</span>
                     <span className="product__price"><span className="product__price__value">{formatCurrency(product.price, 'BRL')}</span></span>
                   </div>
-                  <i className="material-icons cart__product__remove">
+                  <i className="material-icons cart__product__remove"
+                   onClick={() => handleRemoveToCart(product.id)}
+                  >
                     delete
                   </i>
                 </li>
               ))
               }
               </section>
-              <p className="price">Subtotal <span>R$<span className="total-price">0</span></span></p>
+              <p className="price">Subtotal <span>R$<span className="total-price">{formatCurrency(subtotal, 'BRL')}</span></span></p>
               <input type="text" className="cep-input" placeholder="Digite seu CEP" />
               <button className="cep-button cart-button">Buscar CEP</button>
               <span className="cart__address"></span>
