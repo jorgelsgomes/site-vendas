@@ -21,3 +21,14 @@
   z-index: 1000;
   padding: 20px;
 }
+
+.number-product {
+  color:rgb(255, 255, 255);
+  background-color: red;
+  width: 15px;
+  font-size:10px;
+  border-radius: 100%;
+  position: absolute;
+  top: -90px;
+  right: 10px;
+}

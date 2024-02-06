@@ -27,24 +27,24 @@ function App() {
     const savedCart = getProduct();
     setProductsCartId(savedCart);
     getAddToCart(savedCart);
-    
+
     fetchListProducts(busca).then((response) => {
       setProducts(response);
     });
-   
+
   }, [busca]);
 
   // função do botão adicinar ao carrinho, captura os IDs dos produtos e add a um estado e sava no local storage.
   function handleAddIdToCart(productId) {
-    const copyProductsCart = [...productsCartId]
+    const copyProductsCart = [...productsCartId];
 
-    const product = copyProductsCart.find(product => product.id === productId)
+    const product = copyProductsCart.find(product => product.id === productId);
 
     if (!product) {
-      copyProductsCart.push(productId)
+      copyProductsCart.push(productId);
     }
-    setProductsCartId(copyProductsCart)
-    saveCart(copyProductsCart)
+    setProductsCartId(copyProductsCart);
+    saveCart(copyProductsCart);
     getAddToCart(copyProductsCart)
   }
 
@@ -56,44 +56,46 @@ function App() {
           const response = await fetchProduct(id);
           return response;
         });
-  
+
         const fetchedProducts = await Promise.all(fetchPromises);
-  
+
         // Atualize o carrinho com os produtos obtidos.
         setProductsCart(fetchedProducts);
-  
+
         // Calcule o subtotal somando os preços dos produtos.
         const newSubtotal = fetchedProducts.reduce((total, product) => {
           return total + parseFloat(product.price);
         }, 0);
-  
+
         // Atualize o estado do subtotal.
         setSubtotal(newSubtotal);
       } catch (error) {
         console.error('Erro ao obter produtos:', error);
       }
+
+
     }
   }
-  
+
 
   // Função para remover um produto do carrinho.
-function handleRemoveToCart(productId) {
-  setProductsCartId((prevProductsCart) => {
-    const copyProductsCart = [...prevProductsCart];
-  // Encontra o índice do produto no array de IDs.
-  const indexToRemove = copyProductsCart.findIndex((id) => id === productId);
-  // Remove o produto do array de IDs se encontrado.
-  if (indexToRemove !== -1) {
-    copyProductsCart.splice(indexToRemove, 1);
-    // Atualiza o estado e o local storage com os IDs atualizados.
-    setProductsCartId(copyProductsCart);
-    saveCart(copyProductsCart);
-    // Atualiza os produtos no carrinho.
-    getAddToCart(copyProductsCart);
+  function handleRemoveToCart(productId) {
+    setProductsCartId((prevProductsCart) => {
+      const copyProductsCart = [...prevProductsCart];
+      // Encontra o índice do produto no array de IDs.
+      const indexToRemove = copyProductsCart.findIndex((id) => id === productId);
+      // Remove o produto do array de IDs se encontrado.
+      if (indexToRemove !== -1) {
+        copyProductsCart.splice(indexToRemove, 1);
+        // Atualiza o estado e o local storage com os IDs atualizados.
+        setProductsCartId(copyProductsCart);
+        saveCart(copyProductsCart);
+        // Atualiza os produtos no carrinho.
+        getAddToCart(copyProductsCart);
+      }
+      return copyProductsCart;
+    });
   }
-  return copyProductsCart;
-});
-}
 
 
   return (
@@ -104,50 +106,53 @@ function handleRemoveToCart(productId) {
         </div>
       </header>
       <input
-      data-testid="search-input"
-      className='input-search'
-      placeholder="Digite sua Busca..."
-      value={ busca }
-      onChange={ ({ target }) => setbusca(target.value) }
-    />
-        <div
-          className="container-cartTitle"
-          onMouseEnter={() => setIsCartVisible(true)}
-          onMouseLeave={() => setIsCartVisible(false)}
+        data-testid="search-input"
+        className='input-search'
+        placeholder="Digite sua Busca..."
+        value={busca}
+        onChange={({ target }) => setbusca(target.value)}
+      />
+      <div
+        className="container-cartTitle"
+        onMouseEnter={() => setIsCartVisible(true)}
+        onMouseLeave={() => setIsCartVisible(false)}
+      >
+        <i
+          className="material-icons"
+          style={{ fontSize: '35px', color: 'rgb(65, 25, 127)', cursor: 'pointer' }}
         >
-          <i
-            className="material-icons"
-            style={{ fontSize: '35px', color: 'rgb(65, 25, 127)', cursor: 'pointer' }}
-          >
-          </i>
-          {isCartVisible ? (
-            <section className="cart-sidebar">
-              <span className="cart__title">Meu carrinho</span>
-              <section className="products">{productsCart.map((product, index) => (
-                <li key={product.id + index} className="cart__product">
-                  <div className="cart__product__image">
-                    <img src={product.thumbnail} alt={product.title} />
-                  </div>
-                  <div className="cart__product__info-container">
-                    <span className="product__title">{product.title}</span>
-                    <span className="product__price"><span className="product__price__value">{formatCurrency(product.price, 'BRL')}</span></span>
-                  </div>
-                  <i className="material-icons cart__product__remove"
-                   onClick={() => handleRemoveToCart(product.id)}
-                  >
-                    delete
-                  </i>
-                </li>
-              ))
-              }
-              </section>
-              <p className="price">Subtotal <span>R$<span className="total-price">{formatCurrency(subtotal, 'BRL')}</span></span></p>
-              <input type="text" className="cep-input" placeholder="Digite seu CEP" />
-              <button className="cep-button cart-button">Buscar CEP</button>
-              <span className="cart__address"></span>
+          {productsCartId.length > 0 && (
+            <span className="number-product">{productsCartId.length}</span>
+          )}
+        </i>
+        {isCartVisible ? (
+          <section className="cart-sidebar">
+            <span className="cart__title">Meu carrinho</span>
+            <section className="products">{productsCartId.length > 0 && productsCart.map((product, index) => (
+              <li key={product.id + index} className="cart__product">
+                <div className="cart__product__image">
+                  <img src={product.thumbnail} alt={product.title} />
+                </div>
+                <div className="cart__product__info-container">
+                  <span className="product__title">{product.title}</span>
+                  <span className="product__price"><span className="product__price__value">{formatCurrency(product.price, 'BRL')}</span></span>
+                </div>
+                <i className="material-icons cart__product__remove"
+                  onClick={() => handleRemoveToCart(product.id)}
+                >
+                  delete
+                </i>
+              </li>
+            ))
+            }
             </section>
-          ) : (<img src={carrinho} className="carrinho" alt="carrinho de compras" />)}
-        </div>
+            <p className="price">Subtotal <span>R$<span className="total-price">{formatCurrency(subtotal, 'BRL')}</span></span></p>
+            <input type="text" className="cep-input" placeholder="Digite seu CEP" />
+            <button className="cep-button cart-button">Buscar CEP</button>
+            <span className="cart__address"></span>
+          </section>
+        ) : (<img src={carrinho} className="carrinho" alt="carrinho de compras" />)}
+      </div>
       <div className='container' >
         <ul className='products'>
           {products.map(product => (
