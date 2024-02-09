@@ -49,53 +49,70 @@ function App() {
   }
 
   // função que recupera os ID do local storage busca o produto para adicionar ao carrinho de compras.
-  async function getAddToCart(productIds) {
-    if (productIds && productIds.length > 0) {
-      try {
-        const fetchPromises = productIds.map(async (id) => {
-          const response = await fetchProduct(id);
-          return response;
-        });
+  // Função assíncrona para atualizar o carrinho e calcular o subtotal.
+async function getAddToCart(productIds) {
+  if (productIds && productIds.length > 0) {
+    try {
+      const fetchPromises = productIds.map(async (id) => {
+        const response = await fetchProduct(id);
+        return response;
+      });
 
-        const fetchedProducts = await Promise.all(fetchPromises);
+      const fetchedProducts = await Promise.all(fetchPromises);
 
-        // Atualize o carrinho com os produtos obtidos.
-        setProductsCart(fetchedProducts);
+      // Atualize o carrinho com os produtos obtidos.
+      setProductsCart(fetchedProducts);
 
-        // Calcule o subtotal somando os preços dos produtos.
+      // Aguarde a atualização assíncrona do estado antes de calcular o subtotal.
+      setSubtotal(() => {
         const newSubtotal = fetchedProducts.reduce((total, product) => {
           return total + parseFloat(product.price);
         }, 0);
-
-        // Atualize o estado do subtotal.
-        setSubtotal(newSubtotal);
-      } catch (error) {
-        console.error('Erro ao obter produtos:', error);
-      }
-
-
+        return newSubtotal;
+      });
+    
+    } catch (error) {
+      console.error('Erro ao obter produtos:', error);
     }
+  } else {
+    // Se o carrinho estiver vazio, atualize o subtotal para zero.
+    setSubtotal(0);
   }
-
+}
 
   // Função para remover um produto do carrinho.
-  function handleRemoveToCart(productId) {
+  async function handleRemoveToCart(productId) {
     setProductsCartId((prevProductsCart) => {
-      const copyProductsCart = [...prevProductsCart];
-      // Encontra o índice do produto no array de IDs.
-      const indexToRemove = copyProductsCart.findIndex((id) => id === productId);
-      // Remove o produto do array de IDs se encontrado.
+      const copyProductsCartIds = [...prevProductsCart];
+      const indexToRemove = copyProductsCartIds.findIndex((id) => id === productId);
+  
       if (indexToRemove !== -1) {
-        copyProductsCart.splice(indexToRemove, 1);
+        // Remove o produto do array de IDs se encontrado.
+        copyProductsCartIds.splice(indexToRemove, 1);
         // Atualiza o estado e o local storage com os IDs atualizados.
-        setProductsCartId(copyProductsCart);
-        saveCart(copyProductsCart);
+        setProductsCartId(copyProductsCartIds);
+        saveCart(copyProductsCartIds);
         // Atualiza os produtos no carrinho.
-        getAddToCart(copyProductsCart);
+        setProductsCart((prevProducts) => {
+          const updatedProducts = prevProducts.filter((product) => product.id !== productId);
+          return updatedProducts;
+        });
+        if (prevProductsCart.length > 0) {
+          const copyProductsCartIds = [...productsCart];
+          const priceProduct = copyProductsCartIds.find((product) => product.id === productId);
+          if (priceProduct) {
+            // Verifique se o produto foi encontrado antes de calcular o subtotal.
+            const total = subtotal - parseFloat(priceProduct.price);
+            setSubtotal(total);
+          }
+        }
+  
       }
-      return copyProductsCart;
+  
+      return copyProductsCartIds;
     });
   }
+  
 
 
   return (
@@ -128,7 +145,7 @@ function App() {
         {isCartVisible ? (
           <section className="cart-sidebar">
             <span className="cart__title">Meu carrinho</span>
-            <section className="products">{productsCartId.length > 0 && productsCart.map((product, index) => (
+            <section className="products"> {productsCart.map((product, index) => (
               <li key={product.id + index} className="cart__product">
                 <div className="cart__product__image">
                   <img src={product.thumbnail} alt={product.title} />
@@ -143,9 +160,9 @@ function App() {
                   delete
                 </i>
               </li>
-            ))
-            }
+            ))}
             </section>
+            
             <p className="price">Subtotal <span>R$<span className="total-price">{formatCurrency(subtotal, 'BRL')}</span></span></p>
             <input type="text" className="cep-input" placeholder="Digite seu CEP" />
             <button className="cep-button cart-button">Buscar CEP</button>
