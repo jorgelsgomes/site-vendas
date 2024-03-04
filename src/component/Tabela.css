@@ -1,0 +1,19 @@
+#root {
+    margin: 0 auto;
+    text-align: center;
+    color: black;
+    font-size: small;
+  }
+
+  .table-container {
+    display: flex;
+    flex-direction: column;
+    align-content: space-around;
+    width: 100%;
+
+  }
+
+  .table {
+    background-color: rgb(92, 162, 233);
+  }
+
